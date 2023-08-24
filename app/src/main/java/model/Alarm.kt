@@ -4,11 +4,13 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import broadcastReceiver.AlarmReceiver
 import java.util.*
+
 
 @Entity(tableName = "alarm_table")
 data class Alarm(
@@ -28,12 +30,8 @@ data class Alarm(
     @PrimaryKey var id: Long
 ) {
 
-    fun schedule(context: Context) { // ham nay dung de tao bao thuc (core function)
-        Log.e("ALarm", "schedule")
-        // dung alarmManager de gui 1 broadcast tu he thong alarm cua dien thoai
+    fun schedule(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        //khoi tao 1 intent de gui broadcast do den receiver va xu li trong do
         val intent = Intent(context, AlarmReceiver::class.java)
         intent.putExtra("HOUR", hour)
         intent.putExtra("MINUTE", minute)
@@ -49,28 +47,23 @@ data class Alarm(
         intent.putExtra("ID", id)
         val pendingIntent = id.let { PendingIntent.getBroadcast(context, it.toInt(), intent, 0) };
 
-        // lay thoi tu time picker
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = System.currentTimeMillis();
         calendar.set(Calendar.HOUR_OF_DAY, hour)
         calendar.set(Calendar.MINUTE, minute)
         calendar.set(Calendar.SECOND, 0)
 
-        // neu thoi gian hien tai lon hon thoi gian dat bao thuc => tang ngay len 1
         if (calendar.timeInMillis <= System.currentTimeMillis()) {
             calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1)
         }
 
-        // tao bao thuc tren dien thoai
         if (!recurring) {
-            Log.e("Alarm", "!recurring")
             alarmManager.setExact(
                 AlarmManager.RTC_WAKEUP,
                 calendar.timeInMillis,
                 pendingIntent
             )
         } else {
-            Log.e("Alarm", "repeat")
             val daily: Long = 24 * 60 * 60 * 1000
             alarmManager.setRepeating(
                 AlarmManager.RTC_WAKEUP,
@@ -79,9 +72,6 @@ data class Alarm(
                 pendingIntent
             )
         }
-        Log.e("id schedule", id.toString())
-        Log.e("schedule pending intent", pendingIntent.toString())
-        Log.e("Schedule Alarm context", context.toString())
         this.isOn = true
     }
 
@@ -89,9 +79,6 @@ data class Alarm(
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, AlarmReceiver::class.java)
         val pendingIntent = id.let { PendingIntent.getBroadcast(context, it.toInt(), intent, 0) }
-        Log.e("cancel pending intent", pendingIntent.toString())
-        Log.e("id cancel", id.toString())
-        Log.e("Cancel Alarm context", context.toString())
         alarmManager.cancel(pendingIntent)
         this.isOn = false
     }
@@ -110,4 +97,35 @@ data class Alarm(
         if (sunday) recurDays += "Sun "
         return recurDays
     }
+
+    fun setRecurringValues(recurring: Boolean, mon: Boolean, tue: Boolean, wed: Boolean, thu: Boolean, fri: Boolean, sat: Boolean, sun: Boolean) {
+        this.recurring = recurring
+        this.monday = mon
+        this.tuesday = tue
+        this.wednesday = wed
+        this.thursday = thu
+        this.friday = fri
+        this.saturday = sat
+        this.sunday = sun
+    }
+
+    fun setRepeatType(repeatType: Int) {
+        TODO("Not yet implemented")
+    }
+
+    fun setRingtoneUri(ringtoneUri: Uri?) {
+        TODO("Not yet implemented")
+    }
+
+    // ... (기존 함수들)
+    companion object {
+        const val REPEAT_NONE: Int = 0
+        const val REPEAT_WEEKLY = 1
+        const val REPEAT_EVERY_OTHER_WEEK = 2
+        const val REPEAT_EVERY_THIRD_WEEK = 3
+        const val REPEAT_EVERY_FOURTH_WEEK = 4
+        // 다른 반복 주기에 대한 상수도 필요한 경우 여기에 추가하세요.
+    }
+
 }
+

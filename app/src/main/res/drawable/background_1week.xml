@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="false"
+        android:drawable="@drawable/week1"
+        />
+    <item android:state_checked="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#9C9A9A" /> <!-- 여기에 원하는 색상 코드를 설정 -->
+        </shape>
+    </item>
+
+</selector>
